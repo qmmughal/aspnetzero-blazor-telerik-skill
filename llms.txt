@@ -1,0 +1,49 @@
+# aspnetzero-blazor-telerik
+
+> Claude Code Agent Skill: adds, converts, and reviews Blazor UI in ASP.NET Zero (ANZ) / ASP.NET
+> Boilerplate (ABP) solutions using Telerik UI for Blazor, on .NET 10+. Covers the full vertical
+> slice (entity, ABP AppService, DTOs, AppPermissions, localization, multi-tenancy) plus the
+> Blazor-into-ANZ integration seams (static web assets, middleware order, circuit-scoped DI, unit of
+> work, AbpSession over SignalR, TelerikRootComponent, Metronic conflicts).
+
+This is a Claude Code Agent Skill, not a general web page: it is a folder containing a `SKILL.md`
+(with YAML frontmatter `name` + `description`) that Claude Code loads to decide when to activate the
+skill, plus supporting reference docs and copy-paste code templates. See the repo `README.md` for
+installation into `~/.claude/skills/` or `<project>/.claude/skills/`.
+
+## Core
+
+- [SKILL.md](SKILL.md): Skill entry point — frontmatter that triggers activation, plus the
+  step-by-step approach (establish ground truth on ANZ/ABP/Telerik versions and hosting model before
+  writing code, decide full-slice vs. UI-only scope, then implement).
+- [README.md](README.md): Human-readable overview and installation instructions.
+
+## Reference docs
+
+- [references/integration-setup.md](references/integration-setup.md): Wiring Blazor into the ANZ
+  host — static web assets, middleware order, hosting model detection (legacy Blazor Server graft vs.
+  unified Blazor Web App vs. WASM).
+- [references/abp-backend.md](references/abp-backend.md): Entities, ABP `AppService` + DTOs,
+  `AppPermissions`, localization, multi-tenancy, Mapperly vs. AutoMapper mapping.
+- [references/telerik-patterns.md](references/telerik-patterns.md): Telerik UI for Blazor grid/form
+  component patterns wired to ABP paging/sorting/filtering conventions.
+- [references/checklist.md](references/checklist.md): Pre-flight and review checklist for a
+  Blazor+Telerik change in an ANZ/ABP solution.
+
+## Templates
+
+- [assets/templates/Product.cs](assets/templates/Product.cs): Example ABP entity.
+- [assets/templates/ProductDtos.cs](assets/templates/ProductDtos.cs): Example DTOs.
+- [assets/templates/IProductAppService.cs](assets/templates/IProductAppService.cs): Example ABP
+  AppService interface.
+- [assets/templates/ProductAppService.cs](assets/templates/ProductAppService.cs): Example ABP
+  AppService implementation.
+- [assets/templates/GridRequestMapper.cs](assets/templates/GridRequestMapper.cs): Maps Telerik grid
+  requests (paging/sorting/filtering) to ABP query conventions.
+- [assets/templates/ScopedExecutor.cs](assets/templates/ScopedExecutor.cs): Circuit-scoped DI /
+  unit-of-work helper for Blazor Server components calling ABP services.
+- [assets/templates/ProductList.razor](assets/templates/ProductList.razor): Example TelerikGrid list
+  page.
+- [assets/templates/ProductEditWindow.razor](assets/templates/ProductEditWindow.razor): Example
+  Telerik edit window/form.
+- [assets/templates/README.md](assets/templates/README.md): Notes on how the templates fit together.
