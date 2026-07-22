@@ -59,8 +59,20 @@ automatically for prompts like:
 - "`blazor.server.js` 404" / "`AbpSession.TenantId` is null in my component"
 - Any `.razor` work in a Zero/ABP solution
 
-A packaged `.skill` file (a zip of this same folder, for easy sharing outside git) is also produced
-from this source — see [Releases](../../releases) if one is published.
+### Direct download
+
+[`aspnetzero-blazor-telerik.skill`](aspnetzero-blazor-telerik.skill) is the original packaged file —
+a zip of this same skill folder, kept in the repo for direct download/install without cloning. To use
+it:
+
+```bash
+curl -LO https://github.com/qmmughal/aspnetzero-blazor-telerik-skill/raw/main/aspnetzero-blazor-telerik.skill
+unzip aspnetzero-blazor-telerik.skill -d ~/.claude/skills/
+```
+
+That extracts straight to `~/.claude/skills/aspnetzero-blazor-telerik/` (the zip's top-level entry is
+already named `aspnetzero-blazor-telerik/`). Swap the destination for
+`<your-project>/.claude/skills/` for a project-scoped install instead.
 
 ## License
 

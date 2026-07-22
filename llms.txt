@@ -17,6 +17,8 @@ installation into `~/.claude/skills/` or `<project>/.claude/skills/`.
   step-by-step approach (establish ground truth on ANZ/ABP/Telerik versions and hosting model before
   writing code, decide full-slice vs. UI-only scope, then implement).
 - [README.md](README.md): Human-readable overview and installation instructions.
+- [aspnetzero-blazor-telerik.skill](aspnetzero-blazor-telerik.skill): Original packaged file — a zip
+  of this skill folder, kept for direct download/install without cloning the repo.
 
 ## Reference docs
 
