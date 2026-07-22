@@ -1,0 +1,107 @@
+@page "/blazor/catalog/products"
+@rendermode InteractiveServer  @* Unified graft only — remove on the legacy _Host graft *@
+@attribute [Authorize]
+
+@using Abp.Application.Services.Dto
+@using MyProject.Authorization
+@using MyProject.Catalog
+@using MyProject.Catalog.Dto
+@using MyProject.Web.Blazor.Infrastructure
+@using Telerik.DataSource
+
+@inject IScopedExecutor Scoped
+@inject ILocalizationSource L
+@inject DialogFactory Dialogs
+
+<h4>@L.GetString("Products")</h4>
+
+<TelerikGrid @ref="@GridRef"
+             TItem="ProductDto"
+             OnRead="@OnReadAsync"
+             Pageable="true"
+             PageSize="20"
+             Sortable="true"
+             FilterMode="@GridFilterMode.FilterRow">
+    <GridToolBarTemplate>
+        @if (_canCreate)
+        {
+            <TelerikButton ThemeColor="primary" OnClick="@(() => OpenEditor(null))">
+                @L.GetString("CreateNewProduct")
+            </TelerikButton>
+        }
+    </GridToolBarTemplate>
+
+    <GridColumns>
+        <GridColumn Field="@nameof(ProductDto.Name)" Title="@L.GetString("Name")" />
+        <GridColumn Field="@nameof(ProductDto.Price)" Title="@L.GetString("Price")" DisplayFormat="{0:C2}" />
+        <GridCheckboxColumn Field="@nameof(ProductDto.IsActive)" Title="@L.GetString("IsActive")" Editable="false" />
+
+        <GridCommandColumn Width="200px">
+            @if (_canEdit)
+            {
+                <TelerikButton OnClick="@(() => OpenEditor(((ProductDto)context).Id))">
+                    @L.GetString("Edit")
+                </TelerikButton>
+            }
+            @if (_canDelete)
+            {
+                <TelerikButton ThemeColor="error" OnClick="@(() => DeleteAsync((ProductDto)context))">
+                    @L.GetString("Delete")
+                </TelerikButton>
+            }
+        </GridCommandColumn>
+    </GridColumns>
+</TelerikGrid>
+
+<ProductEditWindow @ref="@EditorRef" OnSaved="@(() => GridRef.Rebind())" />
+
+@code {
+    private TelerikGrid<ProductDto> GridRef { get; set; }
+    private ProductEditWindow EditorRef { get; set; }
+
+    private bool _canCreate;
+    private bool _canEdit;
+    private bool _canDelete;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Cosmetic only. [AbpAuthorize] on the AppService is the actual boundary — a UI check
+        // without a matching server-side attribute is the vulnerability, not the fix.
+        _canCreate = await Granted(AppPermissions.Pages_Products_Create);
+        _canEdit   = await Granted(AppPermissions.Pages_Products_Edit);
+        _canDelete = await Granted(AppPermissions.Pages_Products_Delete);
+    }
+
+    private Task<bool> Granted(string permission) =>
+        Scoped.RunAsync<IPermissionChecker, bool>(p => p.IsGrantedAsync(permission));
+
+    private async Task OnReadAsync(GridReadEventArgs args)
+    {
+        var input = new GetProductsInput
+        {
+            SkipCount      = args.Request.Skip,
+            MaxResultCount = args.Request.PageSize,
+            Sorting        = GridRequestMapper.ToAbpSorting(args.Request.Sorts, "id desc"),
+            Filter         = GridRequestMapper.ExtractSimpleFilter(args.Request.Filters, nameof(ProductDto.Name))
+        };
+
+        var result = await Scoped.RunAsync<IProductAppService, PagedResultDto<ProductDto>>(
+            s => s.GetAllAsync(input));
+
+        args.Data  = result.Items;
+        args.Total = result.TotalCount;   // NOT result.Items.Count — that pins the pager to one page
+    }
+
+    private Task OpenEditor(long? id) => EditorRef.ShowAsync(id);
+
+    private async Task DeleteAsync(ProductDto product)
+    {
+        var confirmed = await Dialogs.ConfirmAsync(
+            L.GetString("AreYouSureToDelete", product.Name), L.GetString("Confirm"));
+
+        if (!confirmed) return;
+
+        await Scoped.RunAsync<IProductAppService>(s => s.DeleteAsync(new EntityDto<long>(product.Id)));
+        await GridRef.Rebind();   // re-read from the server; patching a local list leaves the count wrong
+    }
+}

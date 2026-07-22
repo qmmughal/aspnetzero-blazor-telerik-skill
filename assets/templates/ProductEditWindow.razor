@@ -1,0 +1,96 @@
+@using Abp.Application.Services.Dto
+@using Abp.UI
+@using MyProject.Catalog
+@using MyProject.Catalog.Dto
+@using MyProject.Web.Blazor.Infrastructure
+
+@inject IScopedExecutor Scoped
+@inject ILocalizationSource L
+
+@* Renders into TelerikRootComponent. If nothing appears, that's the first thing to check. *@
+<TelerikWindow @bind-Visible="@_visible" Modal="true" Width="520px">
+    <WindowTitle>
+        @(_model?.Id.HasValue == true ? L.GetString("EditProduct") : L.GetString("CreateNewProduct"))
+    </WindowTitle>
+    <WindowContent>
+        @if (_model is not null)
+        {
+            <EditForm Model="@_model" OnValidSubmit="@SaveAsync">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label>@L.GetString("Name")</label>
+                    <TelerikTextBox @bind-Value="@_model.Name" Width="100%" />
+                    <ValidationMessage For="@(() => _model.Name)" />
+                </div>
+
+                <div class="mb-3">
+                    <label>@L.GetString("Price")</label>
+                    <TelerikNumericTextBox @bind-Value="@_model.Price" Format="C2" Min="0" Width="100%" />
+                    <ValidationMessage For="@(() => _model.Price)" />
+                </div>
+
+                <div class="mb-3">
+                    <TelerikCheckBox @bind-Value="@_model.IsActive" Id="isActive" />
+                    <label for="isActive">@L.GetString("IsActive")</label>
+                </div>
+
+                @if (!string.IsNullOrEmpty(_error))
+                {
+                    <div class="alert alert-danger">@_error</div>
+                }
+
+                <TelerikButton ButtonType="ButtonType.Submit" ThemeColor="primary" Enabled="@(!_saving)">
+                    @L.GetString("Save")
+                </TelerikButton>
+                <TelerikButton ButtonType="ButtonType.Button" OnClick="@(() => _visible = false)">
+                    @L.GetString("Cancel")
+                </TelerikButton>
+            </EditForm>
+        }
+    </WindowContent>
+</TelerikWindow>
+
+@code {
+    [Parameter] public EventCallback OnSaved { get; set; }
+
+    private CreateOrEditProductDto _model;
+    private bool _visible;
+    private bool _saving;
+    private string _error;
+
+    public async Task ShowAsync(long? id)
+    {
+        _error = null;
+
+        _model = id.HasValue
+            ? await Scoped.RunAsync<IProductAppService, CreateOrEditProductDto>(
+                s => s.GetForEditAsync(new EntityDto<long>(id.Value)))
+            : new CreateOrEditProductDto { IsActive = true };
+
+        _visible = true;
+        StateHasChanged();
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        _error = null;
+        try
+        {
+            await Scoped.RunAsync<IProductAppService>(s => s.CreateOrEditAsync(_model));
+            _visible = false;
+            await OnSaved.InvokeAsync();
+        }
+        catch (UserFriendlyException ex)
+        {
+            // ABP's channel for business-rule failures. Swallowing this leaves the user
+            // believing the save worked.
+            _error = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}
