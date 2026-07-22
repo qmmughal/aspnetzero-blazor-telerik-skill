@@ -76,4 +76,4 @@ already named `aspnetzero-blazor-telerik/`). Swap the destination for
 
 ## License
 
-No license file is included yet; treat as "all rights reserved" until one is added.
+[MIT](LICENSE)
