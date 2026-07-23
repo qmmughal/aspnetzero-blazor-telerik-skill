@@ -45,7 +45,7 @@ it in one of those directories:
   `<your-project>/.claude/skills/aspnetzero-blazor-telerik/`.
 
 ```bash
-git clone https://github.com/qmmughal/aspnetzero-blazor-telerik-skill.git \
+git clone https://github.com/qmmughal/aspnetzero-blazor-telerik.skill.git \
   ~/.claude/skills/aspnetzero-blazor-telerik
 ```
 
@@ -66,7 +66,7 @@ a zip of this same skill folder, kept in the repo for direct download/install wi
 it:
 
 ```bash
-curl -LO https://github.com/qmmughal/aspnetzero-blazor-telerik-skill/raw/main/aspnetzero-blazor-telerik.skill
+curl -LO https://github.com/qmmughal/aspnetzero-blazor-telerik.skill/raw/main/aspnetzero-blazor-telerik.skill
 unzip aspnetzero-blazor-telerik.skill -d ~/.claude/skills/
 ```
 
